@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hisaab"
+version = "0.1.0"
+description = "Personal Finance Tracker - Parse bank statements into Beancount/Ledger format"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "pandas",
+    "pdfplumber",
+    "typer[all]",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+]
+
+[project.scripts]
+hisaab = "hisaab.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["hisaab*"]
