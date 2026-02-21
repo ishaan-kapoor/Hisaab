@@ -31,14 +31,15 @@ def parse_axis_final(pdf_path):
                     # We are looking for the Transaction Table Header
                     if "date" in full_text and "transaction details" in full_text:
                         header_idx = i
-                        print(f"   ✅ Transaction Table found at Index {t_idx}, Row {i}")
+                        # print(f"   ✅ Transaction Table found at Index {t_idx}, Row {i}")
 
                         # Map columns dynamically
                         for col_i, cell in enumerate(row):
                             val = str(cell).lower()
                             if "date" in val: col_map['date'] = col_i
-                            if "details" in val: col_map['desc'] = col_i
-                            if "amount" in val: col_map['amount'] = col_i
+                            elif "transaction details" in val: col_map['desc'] = col_i
+                            elif "amount" in val: col_map['amount'] = col_i
+                            elif "cashback earned" in val: col_map['cashback'] = col_i
                         break
 
                 # If this table doesn't have the header, check the next one
@@ -52,7 +53,7 @@ def parse_axis_final(pdf_path):
                     date_idx = col_map.get('date', 0)
                     date_val = row[date_idx]
 
-                    # Strict Date Regex: DD/MM/YYYY (from your image)
+                    # Strict Date Regex: DD/MM/YYYY
                     if not date_val or not re.match(r'\d{2}/\d{2}/\d{4}', str(date_val).strip()):
                         continue
 
@@ -73,20 +74,32 @@ def parse_axis_final(pdf_path):
                     desc_idx = col_map.get('desc', 1)
                     desc = str(row[desc_idx]).replace('\n', ' ').strip()
 
+                    # Get Description
+                    cb_idx = col_map.get('cashback', 1)
+                    raw_cashback = str(row[cb_idx]).replace('\n', ' ').strip()
+
+                    cb_is_credit = "cr" in raw_cashback.lower()
+                    # Extract numeric part
+                    cb_match = re.search(r'([\d\.]+)', raw_cashback)
+                    if not cb_match: continue
+
+                    cb_amount = float(cb_match.group(1))
+                    final_cb_amount = cb_amount if cb_is_credit else -cb_amount
+
                     extracted_data.append({
                         "Date": str(date_val).strip(),
                         "Description": desc,
                         "Amount": final_amount,
-                        "Type": "Income" if is_credit else "Expense"
+                        "cashback": final_cb_amount
                     })
 
     return pd.DataFrame(extracted_data)
 
 if __name__ == "__main__":
-    df = parse_axis_final("Axis-Dec.pdf")
+    df = parse_axis_final("./Cards/25-12Dec-Axis.pdf")
     print(f"\n✅ Total Transactions Extracted: {len(df)}")
     if not df.empty:
-        print(df.head())
+        print(df)
         df.to_csv("Axis_Final_Parsed.csv", index=False)
     else:
         print("❌ Still found 0 transactions. Check the table iteration logic.")

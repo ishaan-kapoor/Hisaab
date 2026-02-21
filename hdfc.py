@@ -129,7 +129,6 @@ def parse_hdfc_tataneu(pdf_path):
                             "Description": full_desc.strip(),
                             "NeuCoins": neu_coins,
                             "Amount": amount,
-                            "Type": "Income" if is_credit else "Expense"
                         })
 
     return pd.DataFrame(extracted_data)
@@ -141,7 +140,7 @@ if __name__ == "__main__":
 
         if not df.empty:
             print(f"✅ Extracted {len(df)} transactions")
-            print(df.head())
+            print(df)
 
             output_csv = os.path.splitext(input_file)[0] + "_parsed.csv"
             df.to_csv(output_csv, index=False)
