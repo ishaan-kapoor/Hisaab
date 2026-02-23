@@ -1,3 +1,5 @@
+import re
+
 from hisaab.config import RULES
 from hisaab.models import Transaction
 
@@ -8,7 +10,7 @@ def categorize(transactions: list[Transaction]) -> None:
         text = f"{txn.payee or ''} {txn.description}".lower()
 
         for keyword, category, tags in RULES:
-            if keyword in text:
+            if re.search(keyword, text):
                 for posting in txn.postings:
                     if "Uncategorized" in posting.account:
                         posting.account = category

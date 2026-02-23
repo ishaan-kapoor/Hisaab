@@ -109,6 +109,27 @@ class TestTransform:
         assert inr_sum == Decimal("0")
         assert pts_sum == Decimal("0")
 
+    def test_transform_passes_ref_no(self):
+        """RefNo from DataFrame is passed to Transaction.ref_no."""
+        df = pd.DataFrame({
+            "Date": ["15/01/2024"],
+            "Description": ["Purchase"],
+            "Amount": [-500.0],
+            "RefNo": ["REF123"],
+        })
+        txns = transform(df, default_account="Liabilities:CreditCard:ICICI")
+        assert txns[0].ref_no == "REF123"
+
+    def test_transform_ref_no_none_when_missing(self):
+        """RefNo defaults to None when not in DataFrame."""
+        df = pd.DataFrame({
+            "Date": ["15/01/2024"],
+            "Description": ["Purchase"],
+            "Amount": [-500.0],
+        })
+        txns = transform(df, default_account="Liabilities:CreditCard:ICICI")
+        assert txns[0].ref_no is None
+
     def test_transform_multiple_rows(self):
         """Multiple rows create multiple transactions."""
         df = pd.DataFrame({
@@ -120,3 +141,76 @@ class TestTransform:
 
         assert len(txns) == 2
         assert all(isinstance(t, Transaction) for t in txns)
+
+
+class TestTransformEdgeCases:
+    def test_zero_reward_points_no_pts_postings(self):
+        """RewardPoints=0 should NOT create PTS postings."""
+        df = pd.DataFrame({
+            "Date": ["15/01/2024"],
+            "Description": ["Purchase"],
+            "Amount": [-500.0],
+            "RewardPoints": [0],
+        })
+        txns = transform(
+            df,
+            default_account="Liabilities:CreditCard:ICICI",
+            rewards_account="Assets:RewardPoints:ICICI",
+        )
+
+        assert len(txns) == 1
+        pts_postings = [p for p in txns[0].postings if p.currency == "PTS"]
+        assert len(pts_postings) == 0
+        assert len(txns[0].postings) == 2
+
+    def test_nan_reward_points_no_pts_postings(self):
+        """NaN RewardPoints should NOT create PTS postings."""
+        import numpy as np
+
+        df = pd.DataFrame({
+            "Date": ["15/01/2024"],
+            "Description": ["Purchase"],
+            "Amount": [-500.0],
+            "RewardPoints": [np.nan],
+        })
+        txns = transform(
+            df,
+            default_account="Liabilities:CreditCard:ICICI",
+            rewards_account="Assets:RewardPoints:ICICI",
+        )
+
+        assert len(txns) == 1
+        pts_postings = [p for p in txns[0].postings if p.currency == "PTS"]
+        assert len(pts_postings) == 0
+
+    def test_no_rewards_account_skips_pts_postings(self):
+        """When rewards_account is None, reward points are ignored even if present."""
+        df = pd.DataFrame({
+            "Date": ["15/01/2024"],
+            "Description": ["Purchase"],
+            "Amount": [-500.0],
+            "RewardPoints": [100],
+        })
+        txns = transform(
+            df,
+            default_account="Liabilities:CreditCard:Axis",
+            rewards_account=None,
+        )
+
+        assert len(txns) == 1
+        pts_postings = [p for p in txns[0].postings if p.currency == "PTS"]
+        assert len(pts_postings) == 0
+
+    def test_nan_ref_no_becomes_none(self):
+        """NaN in RefNo column should become None on the Transaction."""
+        import numpy as np
+
+        df = pd.DataFrame({
+            "Date": ["15/01/2024"],
+            "Description": ["Purchase"],
+            "Amount": [-500.0],
+            "RefNo": [np.nan],
+        })
+        txns = transform(df, default_account="Liabilities:CreditCard:ICICI")
+
+        assert txns[0].ref_no is None

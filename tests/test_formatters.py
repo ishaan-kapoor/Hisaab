@@ -1,9 +1,34 @@
 from datetime import date
 from decimal import Decimal
 
+from beancount import loader
+
 from hisaab.models import Posting, Transaction
 from hisaab.formatters.beancount import format_transaction, format_transactions
 from hisaab.formatters import ledger
+
+
+def _validate_beancount(transactions: list[Transaction]) -> None:
+    """Validate that formatted output parses as valid Beancount."""
+    accounts = set()
+    for txn in transactions:
+        for p in txn.postings:
+            accounts.add(p.account)
+
+    currencies = set()
+    for txn in transactions:
+        for p in txn.postings:
+            currencies.add(p.currency)
+
+    preamble_lines = [f"1970-01-01 commodity {c}" for c in sorted(currencies)]
+    for acct in sorted(accounts):
+        preamble_lines.append(f"1970-01-01 open {acct}")
+
+    preamble = "\n".join(preamble_lines) + "\n\n"
+    body = format_transactions(transactions)
+
+    _, errors, _ = loader.load_string(preamble + body)
+    assert errors == [], f"Beancount parse errors: {errors}"
 
 
 class TestBeancountFormatter:
@@ -25,6 +50,7 @@ class TestBeancountFormatter:
         assert "500.00 INR" in result
         assert "Liabilities:CreditCard:HDFC" in result
         assert "-500.00 INR" in result
+        _validate_beancount([txn])
 
     def test_format_transaction_with_tags(self):
         """Test formatting a transaction with tags."""
@@ -41,6 +67,7 @@ class TestBeancountFormatter:
 
         assert "#food" in result
         assert "#delivery" in result
+        _validate_beancount([txn])
 
     def test_format_transaction_with_payee(self):
         """Test formatting a transaction with payee."""
@@ -56,6 +83,7 @@ class TestBeancountFormatter:
         result = format_transaction(txn)
 
         assert '"Netflix"' in result
+        _validate_beancount([txn])
 
     def test_format_transaction_with_meta(self):
         """Test formatting a transaction with metadata."""
@@ -71,6 +99,7 @@ class TestBeancountFormatter:
         result = format_transaction(txn)
 
         assert 'ref: "TXN123456"' in result
+        _validate_beancount([txn])
 
     def test_format_transactions_multiple(self):
         """Test formatting multiple transactions."""
@@ -97,6 +126,21 @@ class TestBeancountFormatter:
         assert "First" in result
         assert "Second" in result
         assert "\n\n" in result  # Transactions separated by blank line
+        _validate_beancount(txns)
+
+    def test_reward_points_valid_beancount(self):
+        """Transaction with multi-currency postings (INR + PTS) is valid Beancount."""
+        txn = Transaction(
+            date=date(2024, 1, 15),
+            description="Purchase with rewards",
+            postings=[
+                Posting(account="Expenses:Shopping", amount=Decimal("1000.00")),
+                Posting(account="Liabilities:CreditCard:ICICI", amount=Decimal("-1000.00")),
+                Posting(account="Assets:RewardPoints:ICICI", amount=Decimal("50"), currency="PTS"),
+                Posting(account="Income:RewardPoints", amount=Decimal("-50"), currency="PTS"),
+            ],
+        )
+        _validate_beancount([txn])
 
 
 class TestLedgerFormatter:

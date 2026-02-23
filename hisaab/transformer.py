@@ -38,6 +38,9 @@ def transform(
         txn_date = parse_date(row["Date"])
         description = row["Description"]
         amount = Decimal(str(row["Amount"]))
+        ref_no = row.get("RefNo", None)
+        if pd.isna(ref_no):
+            ref_no = None
 
         postings = []
 
@@ -78,6 +81,7 @@ def transform(
             date=txn_date,
             description=description,
             postings=postings,
+            ref_no=ref_no,
         )
         transactions.append(txn)
 

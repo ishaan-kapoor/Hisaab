@@ -2,10 +2,6 @@
 
 Personal finance and expense tracker with double-entry accounting.
 
-## Status
-
-**Design Approved** - See `docs/plans/2026-02-15-hisaab-design.md`
-
 ## What This Is
 
 - Parse bank statements (PDF/CSV) from Indian banks (ICICI, HDFC, Axis)
@@ -17,8 +13,8 @@ Personal finance and expense tracker with double-entry accounting.
 ## Architecture
 
 ```
-PDF/CSV  Parser  DataFrame  Transformer  Transaction  Rules  Formatter  .beancount
-                  (standardized)  (+ rewards)                                   .ledger
++PDF/CSV → Parser → DataFrame → Transformer → Transaction → Rules → Formatter → .beancount
++                  (standardized)  (+ rewards)                                  → .ledger
 ```
 
 ## Existing Parsers
@@ -29,22 +25,18 @@ PDF/CSV  Parser  DataFrame  Transformer  Transaction  Rules  Formatter  .
 | `hdfc.py` | HDFC Tata Neu | PDF | Grid tables, extracts NeuCoins |
 | `axis.py` | Axis | PDF | Table extraction |
 
-## Usage (Current - Parsers Only)
+## Usage
 
 ```bash
-python icici.py statement.pdf    # Outputs statement_parsed.csv
-python hdfc.py statement.pdf
-python axis.py statement.pdf
+hisaab import statement.pdf --bank icici    # Parse PDF, categorize, write beancount
+hisaab import statement.pdf --bank icici -n # Dry run (print without saving)
+hisaab show                                 # List all transactions
+hisaab show Expenses:Food                   # Filter by account substring
+hisaab balance                              # Show account balances
+hisaab uncategorized                        # List uncategorized transactions
+hisaab export                               # Export as beancount (default)
+hisaab export --format ledger               # Export as ledger
+hisaab export --format ledger -o out.ledger # Export to file
 ```
 
-## Usage (Planned - Full CLI)
-
-```bash
-hisaab import statement.pdf --bank icici
-hisaab show --from 2026-01-01 --tag food
-hisaab balance Expenses
-hisaab uncategorized
-hisaab export --ledger
-```
-
-See design doc for full details.
+See `design.md` for architecture details.

@@ -1,6 +1,9 @@
+from decimal import Decimal
 from pathlib import Path
 
-from hisaab.models import Transaction
+from beancount import loader
+
+from hisaab.models import Posting, Transaction
 from hisaab.formatters.beancount import format_transactions
 
 
@@ -36,6 +39,28 @@ def ensure_ledger_structure(ledger_dir: Path) -> None:
         )
 
 
+def _update_open_directives(ledger_dir: Path, transactions: list[Transaction]) -> None:
+    """Add open directives for any new accounts found in transactions."""
+    accounts_file = ledger_dir / "accounts.beancount"
+    existing = accounts_file.read_text() if accounts_file.exists() else ""
+
+    new_accounts = set()
+    for txn in transactions:
+        for p in txn.postings:
+            if p.account not in existing:
+                new_accounts.add(p.account)
+
+    if not new_accounts:
+        return
+
+    lines = []
+    for acct in sorted(new_accounts):
+        lines.append(f"1970-01-01 open {acct}")
+
+    with open(accounts_file, "a") as f:
+        f.write("\n" + "\n".join(lines) + "\n")
+
+
 def write_transactions(
     transactions: list[Transaction], ledger_dir: Path, bank: str
 ) -> Path:
@@ -51,9 +76,59 @@ def write_transactions(
     """
     ensure_ledger_structure(ledger_dir)
     bank_file = ledger_dir / f"{bank}.beancount"
-    content = format_transactions(transactions)
+
+    existing_content = bank_file.read_text() if bank_file.exists() else ""
+
+    new_transactions = []
+    for txn in transactions:
+        header = f'{txn.date} * "" "{txn.description}"'
+        if txn.payee:
+            header = f'{txn.date} * "{txn.payee}" "{txn.description}"'
+        if header not in existing_content:
+            new_transactions.append(txn)
+
+    if not new_transactions:
+        return bank_file
+
+    content = format_transactions(new_transactions)
 
     with open(bank_file, "a") as f:
         f.write("\n\n" + content)
 
+    _update_open_directives(ledger_dir, new_transactions)
+
     return bank_file
+
+
+def read_ledger(ledger_dir: Path) -> list:
+    """Read all entries from the ledger directory via beancount loader."""
+    main_file = ledger_dir / "main.beancount"
+    if not main_file.exists():
+        return []
+
+    entries, errors, _ = loader.load_file(str(main_file))
+    return entries
+
+
+def entries_to_transactions(entries: list) -> list[Transaction]:
+    """Convert beancount entries back to Transaction objects for re-formatting."""
+    transactions = []
+    for e in entries:
+        if not hasattr(e, "narration"):
+            continue
+        postings = []
+        for p in e.postings:
+            postings.append(Posting(
+                account=p.account,
+                amount=Decimal(str(p.units.number)),
+                currency=p.units.currency,
+            ))
+        txn = Transaction(
+            date=e.date,
+            description=e.narration,
+            payee=e.payee if e.payee else None,
+            postings=postings,
+            tags=list(e.tags) if e.tags else [],
+        )
+        transactions.append(txn)
+    return transactions

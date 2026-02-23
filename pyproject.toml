@@ -9,6 +9,7 @@ description = "Personal Finance Tracker - Parse bank statements into Beancount/L
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
+    "beancount",
     "pandas",
     "pdfplumber",
     "typer[all]",

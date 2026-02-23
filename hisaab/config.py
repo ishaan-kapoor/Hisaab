@@ -1,14 +1,14 @@
 from pathlib import Path
 
 ACCOUNTS = {
-    "icici_coral": "Liabilities:CreditCard:ICICI:Coral",
-    "hdfc_tataneu": "Liabilities:CreditCard:HDFC:TataNeu",
+    "icici": "Liabilities:CreditCard:ICICI:Coral",
+    "hdfc": "Liabilities:CreditCard:HDFC:TataNeu",
     "axis": "Liabilities:CreditCard:Axis:MyZone",
 }
 
 REWARDS_ACCOUNTS = {
-    "icici_coral": "Assets:RewardPoints:ICICI",
-    "hdfc_tataneu": "Assets:RewardPoints:HDFC:NeuCoins",
+    "icici": "Assets:RewardPoints:ICICI",
+    "hdfc": "Assets:RewardPoints:HDFC:NeuCoins",
 }
 
 # Rules: (keyword, category, tags)
