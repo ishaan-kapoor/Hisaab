@@ -13,8 +13,8 @@ Personal finance and expense tracker with double-entry accounting.
 ## Architecture
 
 ```
-+PDF/CSV → Parser → DataFrame → Transformer → Transaction → Rules → Formatter → .beancount
-+                  (standardized)  (+ rewards)                                  → .ledger
+PDF/CSV -> Parser -> DataFrame -> Transformer -> Transaction -> Rules -> Formatter -> .beancount
+                  (standardized)  (+ rewards)                                      -> .ledger
 ```
 
 ## Existing Parsers
