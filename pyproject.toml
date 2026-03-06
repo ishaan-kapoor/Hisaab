@@ -10,9 +10,11 @@ readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "beancount",
+    "openpyxl",
     "pandas",
     "pdfplumber",
     "typer[all]",
+    "xlrd",
 ]
 
 [project.optional-dependencies]

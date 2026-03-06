@@ -15,11 +15,13 @@ app = typer.Typer(help="Hisaab - Personal Finance Tracker")
 
 
 def detect_bank(filename: str) -> Optional[str]:
-    """Auto-detect bank from filename."""
+    """Auto-detect bank from filename and extension."""
     name_lower = filename.lower()
-    for bank in PARSERS:
+    ext = Path(filename).suffix.lower()
+    is_xls = ext in ('.xls', '.xlsx')
+    for bank in ('icici', 'hdfc', 'axis'):
         if bank in name_lower:
-            return bank
+            return f"{bank}-xls" if is_xls else bank
     return None
 
 
