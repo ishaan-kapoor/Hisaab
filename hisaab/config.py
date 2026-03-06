@@ -129,15 +129,15 @@ RULES = [
     ("tata 1mg", "Expenses:Health:Pharmacy", ["health"]),
 
     # Finance - Insurance
-    ("lic\\b", "Expenses:Finance:Insurance", []),
     ("hdfc life", "Expenses:Finance:Insurance", []),
     ("icici prudential", "Expenses:Finance:Insurance", []),
     ("star health", "Expenses:Finance:Insurance", []),
     ("niva bupa", "Expenses:Finance:Insurance", []),
 
     # Investments
-    ("zerodha", "Assets:Investment:MutualFund", ["investment"]),
-    ("indian clearing corp", "Assets:Investment:MutualFund", ["investment"]),
+    ("zerodha", "Assets:Investment:MutualFund", ["investment", "zerodha"]),
+    ("ach-dr-bd-mf utilities lump", "Assets:Investment:MutualFund", ["investment", "vishalJi"]),
+    ("indian clearing corp", "Assets:Investment:MutualFund", ["investment", "zerodha"]),
 
     # Finance - Credit Card Payment
     ("payment.*thank", "Income:CreditCardPayment", []),

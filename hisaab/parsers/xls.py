@@ -16,7 +16,7 @@ def _parse_amount(val) -> float:
 
 def _normalize_date(val) -> str:
     s = str(val).strip()
-    for fmt in ('%Y-%m-%d %H:%M:%S', '%d/%m/%Y', '%d-%m-%Y', '%Y-%m-%d', '%d %b %Y', '%d-%b-%Y', '%d %B %Y'):
+    for fmt in ('%Y-%m-%d %H:%M:%S', '%d/%m/%Y', '%d-%m-%Y', '%d,%m,%Y', '%Y-%m-%d', '%d %b %Y', '%d-%b-%Y', '%d %B %Y'):
         try:
             return datetime.strptime(s, fmt).strftime('%d/%m/%Y')
         except ValueError:

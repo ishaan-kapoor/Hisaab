@@ -19,6 +19,9 @@ def ensure_ledger_structure(ledger_dir: Path) -> None:
             'include "icici.beancount"\n'
             'include "hdfc.beancount"\n'
             'include "axis.beancount"\n'
+            'include "icici-xls.beancount"\n'
+            'include "hdfc-xls.beancount"\n'
+            'include "axis-xls.beancount"\n'
         )
 
     accounts_file = ledger_dir / "accounts.beancount"
