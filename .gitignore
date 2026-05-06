@@ -1,11 +1,47 @@
+# Bank statements (sensitive)
 *.pdf
 *.csv
+*.xls
+*.xlsx
 
-/.venv
-__pycache__
+# Local ledger output
+~/finance/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
 *.egg-info/
+*.egg
+build/
+dist/
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Test/coverage caches
 .pytest_cache/
 .hypothesis/
 .benchmarks/
-dist/
-build/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.mypy_cache/
+.ruff_cache/
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Local notes (not for commit)
+notes.md
+TODO.local.md

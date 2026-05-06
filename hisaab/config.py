@@ -12,6 +12,7 @@ ACCOUNTS = {
 REWARDS_ACCOUNTS = {
     "icici": "Assets:RewardPoints:ICICI",
     "hdfc": "Assets:RewardPoints:HDFC:NeuCoins",
+    "axis": "Assets:RewardPoints:Axis",
 }
 
 # Rules: (keyword_regex, category, tags)
@@ -29,7 +30,7 @@ RULES = [
     ("jiomart", "Expenses:Food:Grocery", ["food"]),
     ("dmart", "Expenses:Food:Grocery", ["food"]),
     ("grofers", "Expenses:Food:Grocery", ["food"]),
-    ("instamart", "Expenses:Food:Grocery", ["food"]),  # Swiggy Instamart
+    ("instamart", "Expenses:Food:Grocery", ["food"]),
 
     # Food - Restaurants & Cafes
     ("dominos", "Expenses:Food:Restaurant", ["food"]),

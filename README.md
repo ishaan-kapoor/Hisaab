@@ -25,6 +25,16 @@ PDF/CSV -> Parser -> DataFrame -> Transformer -> Transaction -> Rules -> Formatt
 | `hdfc.py` | HDFC Tata Neu | PDF | Grid tables, extracts NeuCoins |
 | `axis.py` | Axis | PDF | Table extraction |
 
+## Setup
+
+```bash
+python3 -m venv .venv
+.venv/bin/pip install -e '.[dev]'
+.venv/bin/pytest                            # verify
+```
+
+Activate with `source .venv/bin/activate` for an interactive shell.
+
 ## Usage
 
 ```bash

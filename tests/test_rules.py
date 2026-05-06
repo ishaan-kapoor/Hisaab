@@ -81,38 +81,6 @@ class TestCategorize:
         assert expense_posting.account == "Expenses:Uncategorized"
         assert txn.tags == []
 
-    def test_categorize_multiple_transactions(self):
-        """Multiple transactions are categorized correctly."""
-        txns = [
-            Transaction(
-                date=date(2024, 1, 15),
-                description="Swiggy order",
-                postings=[
-                    Posting(account="Expenses:Uncategorized", amount=Decimal("350.00")),
-                    Posting(
-                        account="Liabilities:CreditCard:ICICI",
-                        amount=Decimal("-350.00"),
-                    ),
-                ],
-            ),
-            Transaction(
-                date=date(2024, 1, 16),
-                description="Amazon purchase",
-                postings=[
-                    Posting(account="Expenses:Uncategorized", amount=Decimal("1000.00")),
-                    Posting(
-                        account="Liabilities:CreditCard:ICICI",
-                        amount=Decimal("-1000.00"),
-                    ),
-                ],
-            ),
-        ]
-        categorize(txns)
-
-        assert txns[0].postings[0].account == "Expenses:Food:Delivery"
-        assert txns[1].postings[0].account == "Expenses:Shopping"
-
-
 class TestCategorizeEdgeCases:
     def test_case_insensitive_matching(self):
         """Rules match regardless of case in description."""

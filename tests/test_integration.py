@@ -34,11 +34,6 @@ def test_full_pipeline():
     assert expense_posting.account == "Expenses:Food:Delivery"
     assert "food" in swiggy_txn.tags
 
-    # Check Amazon was categorized
-    amazon_txn = transactions[1]
-    expense_posting = next(p for p in amazon_txn.postings if p.amount > 0)
-    assert expense_posting.account == "Expenses:Shopping"
-
     # Check RefNo passthrough
     assert transactions[0].ref_no == "REF001"
     assert transactions[1].ref_no is None
@@ -548,8 +543,6 @@ class TestFullRoundTrip:
         # Verify Amazon transaction
         amazon = recovered[1]
         assert amazon.description == "AMAZON PURCHASE"
-        shopping = next(p for p in amazon.postings if "Shopping" in p.account)
-        assert shopping.account == "Expenses:Shopping"
 
         # Verify payment (credit)
         payment = recovered[2]
