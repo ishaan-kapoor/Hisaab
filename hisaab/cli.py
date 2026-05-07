@@ -180,6 +180,22 @@ def export(
         typer.echo(text)
 
 
+@app.command()
+def fava(
+    port: int = typer.Option(5000, "--port", "-p", help="Port to bind"),
+    host: str = typer.Option("localhost", "--host", "-h", help="Host to bind"),
+):
+    """Launch Fava web UI on the ledger."""
+    import subprocess
+
+    main_file = LEDGER_DIR / "main.beancount"
+    if not main_file.exists():
+        typer.echo(f"No ledger found at {main_file}. Import a statement first.")
+        raise typer.Exit(1)
+
+    subprocess.run(["fava", "--port", str(port), "--host", host, str(main_file)])
+
+
 def main():
     app()
 

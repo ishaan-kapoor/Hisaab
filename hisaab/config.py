@@ -30,7 +30,7 @@ RULES = [
     ("jiomart", "Expenses:Food:Grocery", ["food"]),
     ("dmart", "Expenses:Food:Grocery", ["food"]),
     ("grofers", "Expenses:Food:Grocery", ["food"]),
-    ("instamart", "Expenses:Food:Grocery", ["food"]),
+    ("instamart", "Expenses:Food:Grocery", ["food"]),  # Swiggy Instamart
 
     # Food - Restaurants & Cafes
     ("dominos", "Expenses:Food:Restaurant", ["food"]),

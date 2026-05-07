@@ -9,12 +9,13 @@ description = "Personal Finance Tracker - Parse bank statements into Beancount/L
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "beancount",
-    "openpyxl",
-    "pandas",
-    "pdfplumber",
-    "typer[all]",
-    "xlrd",
+    "beancount>=3.2",
+    "fava>=1.30",
+    "openpyxl>=3.1",
+    "pandas>=3.0",
+    "pdfplumber>=0.11",
+    "typer>=0.25",
+    "xlrd>=2.0",
 ]
 
 [project.optional-dependencies]

@@ -42,6 +42,32 @@ class TestCLI:
         result = runner.invoke(app, ["export", "--help"])
         assert result.exit_code == 0
 
+    def test_fava_command_exists(self):
+        """Fava command should be available."""
+        result = runner.invoke(app, ["fava", "--help"])
+        assert result.exit_code == 0
+
+
+class TestFavaCommand:
+    def test_fava_errors_when_no_ledger(self, tmp_path):
+        """Fava should fail cleanly when main.beancount is missing."""
+        with patch("hisaab.cli.LEDGER_DIR", tmp_path):
+            result = runner.invoke(app, ["fava"])
+        assert result.exit_code == 1
+        assert "No ledger found" in result.stdout
+
+    @patch("subprocess.run")
+    def test_fava_invokes_subprocess_with_args(self, mock_run, tmp_path):
+        """Fava should shell out to fava with the configured port/host/file."""
+        main_file = tmp_path / "main.beancount"
+        main_file.write_text("; empty\n")
+        with patch("hisaab.cli.LEDGER_DIR", tmp_path):
+            result = runner.invoke(app, ["fava", "--port", "5050", "--host", "0.0.0.0"])
+        assert result.exit_code == 0
+        mock_run.assert_called_once_with(
+            ["fava", "--port", "5050", "--host", "0.0.0.0", str(main_file)]
+        )
+
 
 class TestImportCommand:
     @patch("hisaab.cli.write_transactions")

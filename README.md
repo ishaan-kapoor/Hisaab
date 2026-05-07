@@ -29,8 +29,10 @@ PDF/CSV -> Parser -> DataFrame -> Transformer -> Transaction -> Rules -> Formatt
 
 ```bash
 python3 -m venv .venv
-.venv/bin/pip install -e '.[dev]'
+.venv/bin/pip install -e '.[dev]'           # editable + dev deps
+.venv/bin/pip install -r requirements.txt   # pinned versions, optional
 .venv/bin/pytest                            # verify
+.venv/bin/hisaab --install-completion       # shell tab completion
 ```
 
 Activate with `source .venv/bin/activate` for an interactive shell.

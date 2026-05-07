@@ -401,8 +401,12 @@ class TestDedup:
         assert "Netflix" in content
         assert "Spotify" in content
 
-    def test_same_description_no_payee_vs_with_payee_not_deduped(self, tmp_path):
-        """Transaction without payee and same transaction with payee should not be deduped."""
+    def test_same_signature_with_added_payee_is_deduped(self, tmp_path):
+        """Same date/amount/description with a payee added later should dedupe.
+
+        Signature ignores payee so that re-importing a statement after manually
+        annotating an entry does not create a duplicate.
+        """
         from datetime import date
 
         batch1 = [
@@ -431,7 +435,167 @@ class TestDedup:
         write_transactions(batch2, tmp_path, "icici")
 
         content = (tmp_path / "icici.beancount").read_text()
-        assert content.count("Payment received") == 2
+        assert content.count("Payment received") == 1
+
+    def test_dedup_uses_ref_no_when_present(self, tmp_path):
+        """Same ref_no across imports should dedupe even when description differs."""
+        from datetime import date
+
+        batch1 = [
+            Transaction(
+                date=date(2024, 1, 15),
+                description="SWIGGY ORDER #abc",
+                ref_no="REF12345",
+                postings=[
+                    Posting(account="Expenses:Uncategorized", amount=Decimal("540.00")),
+                    Posting(account="Liabilities:CreditCard:ICICI:Coral", amount=Decimal("-540.00")),
+                ],
+            ),
+        ]
+        batch2 = [
+            Transaction(
+                date=date(2024, 1, 15),
+                description="Swiggy - cleaned up description",
+                ref_no="REF12345",
+                postings=[
+                    Posting(account="Expenses:Food:Delivery", amount=Decimal("540.00")),
+                    Posting(account="Liabilities:CreditCard:ICICI:Coral", amount=Decimal("-540.00")),
+                ],
+            ),
+        ]
+
+        write_transactions(batch1, tmp_path, "icici")
+        write_transactions(batch2, tmp_path, "icici")
+
+        content = (tmp_path / "icici.beancount").read_text()
+        assert content.count("REF12345") == 1
+        assert "SWIGGY ORDER #abc" in content
+        assert "cleaned up description" not in content
+
+    def test_genuine_duplicates_in_batch_are_preserved(self, tmp_path):
+        """Two same-(date, amount, description) txns in one batch are real
+        transactions (e.g., two same-day Uber rides) and must both land."""
+        from datetime import date
+
+        txn = Transaction(
+            date=date(2024, 1, 15),
+            description="UBER TRIP",
+            postings=[
+                Posting(account="Expenses:Transport:Cab", amount=Decimal("120.00")),
+                Posting(account="Liabilities:CreditCard:ICICI:Coral", amount=Decimal("-120.00")),
+            ],
+        )
+
+        write_transactions([txn, txn], tmp_path, "icici")
+
+        content = (tmp_path / "icici.beancount").read_text()
+        assert content.count("UBER TRIP") == 2
+
+    def test_reimport_with_genuine_duplicates_does_not_double(self, tmp_path):
+        """If the input has 2 same-sig txns and the file already has 2 from a
+        prior import, the re-import should add zero new entries."""
+        from datetime import date
+
+        txn = Transaction(
+            date=date(2024, 1, 15),
+            description="UBER TRIP",
+            postings=[
+                Posting(account="Expenses:Transport:Cab", amount=Decimal("120.00")),
+                Posting(account="Liabilities:CreditCard:ICICI:Coral", amount=Decimal("-120.00")),
+            ],
+        )
+
+        write_transactions([txn, txn], tmp_path, "icici")
+        write_transactions([txn, txn], tmp_path, "icici")  # re-import
+
+        content = (tmp_path / "icici.beancount").read_text()
+        assert content.count("UBER TRIP") == 2
+
+    def test_partial_overlap_writes_only_new(self, tmp_path):
+        """If the file has 1 of a sig and the input has 3, write 2 more."""
+        from datetime import date
+
+        txn = Transaction(
+            date=date(2024, 1, 15),
+            description="UBER TRIP",
+            postings=[
+                Posting(account="Expenses:Transport:Cab", amount=Decimal("120.00")),
+                Posting(account="Liabilities:CreditCard:ICICI:Coral", amount=Decimal("-120.00")),
+            ],
+        )
+
+        write_transactions([txn], tmp_path, "icici")
+        write_transactions([txn, txn, txn], tmp_path, "icici")
+
+        content = (tmp_path / "icici.beancount").read_text()
+        assert content.count("UBER TRIP") == 3
+
+    def test_dedup_robust_to_description_whitespace(self, tmp_path):
+        """Whitespace-only differences in description should still dedupe."""
+        from datetime import date
+
+        batch1 = [
+            Transaction(
+                date=date(2024, 1, 15),
+                description="AMAZON  RETAIL  PVT  LTD",
+                postings=[
+                    Posting(account="Expenses:Uncategorized", amount=Decimal("1200.00")),
+                    Posting(account="Liabilities:CreditCard:ICICI:Coral", amount=Decimal("-1200.00")),
+                ],
+            ),
+        ]
+        batch2 = [
+            Transaction(
+                date=date(2024, 1, 15),
+                description="Amazon Retail Pvt Ltd",
+                postings=[
+                    Posting(account="Expenses:Uncategorized", amount=Decimal("1200.00")),
+                    Posting(account="Liabilities:CreditCard:ICICI:Coral", amount=Decimal("-1200.00")),
+                ],
+            ),
+        ]
+
+        write_transactions(batch1, tmp_path, "icici")
+        write_transactions(batch2, tmp_path, "icici")
+
+        content = (tmp_path / "icici.beancount").read_text()
+        assert content.count("AMAZON  RETAIL") == 1
+        assert "Amazon Retail Pvt Ltd" not in content
+
+    def test_dedup_survives_manual_recategorization(self, tmp_path):
+        """Re-importing after the user manually recategorizes should not duplicate.
+
+        This is the headline robustness improvement: signature ignores account
+        names and payee, so it doesn't matter what the user did to the entry
+        after the original write.
+        """
+        from datetime import date
+
+        original = [
+            Transaction(
+                date=date(2024, 1, 15),
+                description="ZOMATO 1234",
+                postings=[
+                    Posting(account="Expenses:Uncategorized", amount=Decimal("450.00")),
+                    Posting(account="Liabilities:CreditCard:ICICI:Coral", amount=Decimal("-450.00")),
+                ],
+            ),
+        ]
+        write_transactions(original, tmp_path, "icici")
+
+        # Simulate the user manually recategorizing in nvim:
+        bank_file = tmp_path / "icici.beancount"
+        bank_file.write_text(
+            bank_file.read_text().replace("Expenses:Uncategorized", "Expenses:Food:Delivery")
+        )
+
+        # Re-import the same statement (still parsed as Uncategorized)
+        write_transactions(original, tmp_path, "icici")
+
+        content = bank_file.read_text()
+        assert content.count("ZOMATO 1234") == 1
+        assert "Expenses:Food:Delivery" in content
+        assert "Expenses:Uncategorized" not in content
 
 
 class TestAutoOpenDirectives:

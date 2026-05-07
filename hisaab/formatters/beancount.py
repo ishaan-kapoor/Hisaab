@@ -12,6 +12,9 @@ def format_transaction(txn: Transaction) -> str:
 
     lines = [header]
 
+    if txn.ref_no:
+        lines.append(f'  ref: "{txn.ref_no}"')
+
     for key, val in txn.meta.items():
         lines.append(f'  {key}: "{val}"')
 
