@@ -181,6 +181,160 @@ def export(
 
 
 @app.command()
+def merchants():
+    """List uncategorized merchants by frequency and total spend."""
+    from hisaab.categorizer import group_uncategorized
+    from hisaab.storage import entries_to_transactions, read_ledger
+
+    transactions = entries_to_transactions(read_ledger(LEDGER_DIR))
+    buckets = group_uncategorized(transactions)
+
+    if not buckets:
+        typer.echo("No uncategorized transactions.")
+        return
+
+    typer.echo(f"{len(buckets)} uncategorized merchant(s):\n")
+    typer.echo(f"{'#':>3}  {'count':>5}  {'total INR':>12}  fingerprint")
+    typer.echo("-" * 60)
+    for i, b in enumerate(buckets, 1):
+        typer.echo(f"{i:>3}  {b.count:>5}  {b.total_abs:>12,.2f}  {b.fingerprint}")
+
+
+@app.command()
+def learn():
+    """Walk uncategorized merchants and append rules to config.py."""
+    import hisaab.config as cfg
+    from hisaab.categorizer import (
+        append_rule, existing_categories, existing_tags, first_alpha_token,
+        fzf_pick, group_uncategorized, input_with_prefill, reload_rules,
+    )
+    from hisaab.storage import entries_to_transactions, read_ledger
+
+    transactions = entries_to_transactions(read_ledger(LEDGER_DIR))
+    buckets = group_uncategorized(transactions)
+
+    if not buckets:
+        typer.echo("No uncategorized transactions to learn from.")
+        return
+
+    config_path = Path(cfg.__file__)
+    rules = list(cfg.RULES)
+    added = 0
+    skipped = 0
+
+    typer.echo(f"{len(buckets)} merchant(s) to categorize. [s]kip / [q]uit\n")
+
+    for i, b in enumerate(buckets, 1):
+        typer.echo(f"[{i}/{len(buckets)}] {b.fingerprint}  --  {b.count} txns, INR {b.total_abs:,.2f}")
+        typer.echo("  samples:")
+        for s in b.samples:
+            typer.echo(f"    {s}")
+
+        prefill = first_alpha_token(b.most_common_description)
+        try:
+            pattern = input_with_prefill("  pattern  > ", prefill)
+        except (EOFError, KeyboardInterrupt):
+            typer.echo("\n")
+            break
+        if pattern.lower() == "q":
+            break
+        if pattern.lower() == "s" or not pattern:
+            skipped += 1
+            typer.echo("  skipped\n")
+            continue
+
+        category_pick = fzf_pick(existing_categories(rules, LEDGER_DIR), "category")
+        if not category_pick:
+            skipped += 1
+            typer.echo("  skipped (no category)\n")
+            continue
+        category = category_pick[0]
+
+        tag_pick = fzf_pick(existing_tags(rules), "tags", multi=True)
+        tags = tag_pick
+
+        append_rule(config_path, pattern, category, tags)
+        rules = reload_rules(config_path)
+        added += 1
+        typer.echo(f"  -> ({pattern!r}, {category!r}, {tags!r})\n")
+
+    typer.echo(f"Done. Added {added} rule(s), skipped {skipped}.")
+    if added:
+        typer.echo("Run 'hisaab recategorize' to apply to existing transactions.")
+
+
+@app.command()
+def recategorize(
+    dry_run: bool = typer.Option(False, "--dry-run", "-n", help="Show changes without writing"),
+):
+    """Re-run RULES against existing Uncategorized entries in the ledger."""
+    import importlib
+    from copy import deepcopy
+
+    import hisaab.config as cfg_module
+    from hisaab.categorizer import (
+        is_uncategorized, recategorize_entry_in_file,
+    )
+    from hisaab.rules import categorize
+    from hisaab.storage import entries_to_transactions, read_ledger
+
+    importlib.reload(cfg_module)
+    entries = read_ledger(LEDGER_DIR)
+    txns = entries_to_transactions(entries)
+
+    uncats_with_entry = [
+        (e, t) for e, t in zip(
+            (e for e in entries if hasattr(e, "narration")), txns
+        )
+        if is_uncategorized(t)
+    ]
+
+    if not uncats_with_entry:
+        typer.echo("Nothing uncategorized.")
+        return
+
+    after = [deepcopy(t) for _, t in uncats_with_entry]
+    categorize(after)
+
+    changes = []
+    for (entry, before), updated in zip(uncats_with_entry, after):
+        account_changes = {}
+        for b_post, a_post in zip(before.postings, updated.postings):
+            if b_post.account != a_post.account:
+                account_changes[b_post.account] = a_post.account
+        added_tags = [t for t in updated.tags if t not in before.tags]
+        if account_changes or added_tags:
+            changes.append((entry, account_changes, added_tags))
+
+    if not changes:
+        typer.echo("No matching rules. Add rules with 'hisaab learn' first.")
+        return
+
+    typer.echo(f"{len(changes)} entr(ies) would be updated:\n")
+    for entry, acct_changes, tags in changes:
+        loc = f"{entry.meta.get('filename')}:{entry.meta.get('lineno')}"
+        typer.echo(f"  {entry.date}  {entry.narration}")
+        typer.echo(f"    {loc}")
+        for old, new in acct_changes.items():
+            typer.echo(f"    {old}  ->  {new}")
+        if tags:
+            typer.echo(f"    +tags: {', '.join('#' + t for t in tags)}")
+
+    if dry_run:
+        typer.echo("\n(dry-run; no files written)")
+        return
+
+    written_files = set()
+    for entry, acct_changes, tags in changes:
+        path = Path(entry.meta["filename"])
+        lineno = entry.meta["lineno"]
+        if recategorize_entry_in_file(path, lineno, acct_changes, tags):
+            written_files.add(path)
+
+    typer.echo(f"\nWrote {len(written_files)} file(s).")
+
+
+@app.command()
 def fava(
     port: int = typer.Option(5000, "--port", "-p", help="Port to bind"),
     host: str = typer.Option("localhost", "--host", "-h", help="Host to bind"),

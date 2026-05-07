@@ -47,6 +47,18 @@ class TestCLI:
         result = runner.invoke(app, ["fava", "--help"])
         assert result.exit_code == 0
 
+    def test_merchants_command_exists(self):
+        result = runner.invoke(app, ["merchants", "--help"])
+        assert result.exit_code == 0
+
+    def test_learn_command_exists(self):
+        result = runner.invoke(app, ["learn", "--help"])
+        assert result.exit_code == 0
+
+    def test_recategorize_command_exists(self):
+        result = runner.invoke(app, ["recategorize", "--help"])
+        assert result.exit_code == 0
+
 
 class TestFavaCommand:
     def test_fava_errors_when_no_ledger(self, tmp_path):
