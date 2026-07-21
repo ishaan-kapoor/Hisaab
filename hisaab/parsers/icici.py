@@ -4,6 +4,7 @@ import pandas as pd
 import pdfplumber
 
 from hisaab.parsers.base import StatementParser
+from hisaab.parsers.xls import XLSParser 
 
 
 def clean_description(desc):
@@ -22,7 +23,7 @@ def clean_description(desc):
     return desc
 
 
-class ICICIParser(StatementParser):
+class ICICI_CC_Parser(StatementParser):
 
     def parse(self, file_path: str) -> pd.DataFrame:
         extracted_data = []
@@ -112,3 +113,19 @@ class ICICIParser(StatementParser):
                 extracted_data.append(current_txn)
 
         return self.validate(pd.DataFrame(extracted_data))
+
+
+class ICICIXLSParser(XLSParser):
+
+    def parse(self, file_path: str) -> pd.DataFrame:
+        return self._parse_xls(
+            file_path,
+            key_cols=['Transaction Date', 'Transaction Remarks', 'Withdrawal', 'Deposit'],
+            date_kw='Transaction Date',
+            desc_kw='Transaction Remarks',
+            dr_kw='Withdrawal',
+            cr_kw='Deposit',
+            ref_kw='Cheque Number',
+        )
+
+

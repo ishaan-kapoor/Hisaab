@@ -19,9 +19,15 @@ def detect_bank(filename: str) -> Optional[str]:
     name_lower = filename.lower()
     ext = Path(filename).suffix.lower()
     is_xls = ext in ('.xls', '.xlsx')
-    for bank in ('icici', 'hdfc', 'axis'):
+    is_pdf = ext == '.pdf'
+    extra_mapping = { "emralde": 'icici', "coral": 'icici' }
+    banks = ('icici', 'hdfc', 'axis')
+    for bank in banks:
         if bank in name_lower:
-            return f"{bank}-xls" if is_xls else bank
+            return f"{bank}-cc" if is_pdf else bank
+    for key_word, bank in extra_mapping.items():
+        if key_word in name_lower:
+            return f"{bank}-cc" if is_pdf else bank
     return None
 
 

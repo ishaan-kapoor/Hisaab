@@ -4,9 +4,10 @@ import pandas as pd
 import pdfplumber
 
 from hisaab.parsers.base import StatementParser
+from hisaab.parsers.xls import XLSParser 
 
 
-class AxisParser(StatementParser):
+class Axis_CC_Parser(StatementParser):
 
     def parse(self, file_path: str) -> pd.DataFrame:
         extracted_data = []
@@ -86,3 +87,19 @@ class AxisParser(StatementParser):
                         })
 
         return self.validate(pd.DataFrame(extracted_data))
+
+
+class AxisXLSParser(XLSParser):
+
+    def parse(self, file_path: str) -> pd.DataFrame:
+        return self._parse_xls(
+            file_path,
+            key_cols=['Tran Date', 'PARTICULARS', 'DR', 'CR'],
+            date_kw='Tran Date',
+            desc_kw='PARTICULARS',
+            dr_kw='DR',
+            cr_kw='CR',
+            ref_kw='CHQNO',
+        )
+
+

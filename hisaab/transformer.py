@@ -63,7 +63,11 @@ def transform(
             )
 
         # Handle reward points if present
-        if rewards_account and "RewardPoints" in row and pd.notna(row["RewardPoints"]):
+        if (
+                bool(rewards_account) and
+                ("RewardPoints" in row) and
+                pd.notna(row["RewardPoints"])
+            ):
             points = Decimal(str(int(row["RewardPoints"])))
             if points > 0:
                 postings.append(

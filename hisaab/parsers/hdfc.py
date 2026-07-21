@@ -4,9 +4,10 @@ import pandas as pd
 import pdfplumber
 
 from hisaab.parsers.base import StatementParser
+from hisaab.parsers.xls import XLSParser 
 
 
-class HDFCParser(StatementParser):
+class HDFC_CC_Parser(StatementParser):
 
     def parse(self, file_path: str) -> pd.DataFrame:
         extracted_data = []
@@ -107,3 +108,17 @@ class HDFCParser(StatementParser):
                         })
 
         return self.validate(pd.DataFrame(extracted_data))
+
+
+class HDFCXLSParser(XLSParser):
+
+    def parse(self, file_path: str) -> pd.DataFrame:
+        return self._parse_xls(
+            file_path,
+            key_cols=['Narration', 'Withdrawal Amt', 'Deposit Amt'],
+            date_kw='Date',
+            desc_kw='Narration',
+            dr_kw='Withdrawal Amt',
+            cr_kw='Deposit Amt',
+            ref_kw='Chq',
+        )

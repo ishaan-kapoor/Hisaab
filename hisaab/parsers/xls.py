@@ -47,7 +47,7 @@ def _load_xls(file_path: str, key_cols: list[str]) -> pd.DataFrame:
     return df
 
 
-class _XLSParser(StatementParser):
+class XLSParser(StatementParser):
     """Shared logic for debit/credit column XLS bank statements."""
 
     def _parse_xls(self, file_path: str, key_cols: list[str],
@@ -88,46 +88,4 @@ class _XLSParser(StatementParser):
             })
 
         return self.validate(pd.DataFrame(rows))
-
-
-class AxisXLSParser(_XLSParser):
-
-    def parse(self, file_path: str) -> pd.DataFrame:
-        return self._parse_xls(
-            file_path,
-            key_cols=['Tran Date', 'PARTICULARS', 'DR', 'CR'],
-            date_kw='Tran Date',
-            desc_kw='PARTICULARS',
-            dr_kw='DR',
-            cr_kw='CR',
-            ref_kw='CHQNO',
-        )
-
-
-class ICICIXLSParser(_XLSParser):
-
-    def parse(self, file_path: str) -> pd.DataFrame:
-        return self._parse_xls(
-            file_path,
-            key_cols=['Transaction Date', 'Transaction Remarks', 'Withdrawal', 'Deposit'],
-            date_kw='Transaction Date',
-            desc_kw='Transaction Remarks',
-            dr_kw='Withdrawal',
-            cr_kw='Deposit',
-            ref_kw='Cheque Number',
-        )
-
-
-class HDFCXLSParser(_XLSParser):
-
-    def parse(self, file_path: str) -> pd.DataFrame:
-        return self._parse_xls(
-            file_path,
-            key_cols=['Narration', 'Withdrawal Amt', 'Deposit Amt'],
-            date_kw='Date',
-            desc_kw='Narration',
-            dr_kw='Withdrawal Amt',
-            cr_kw='Deposit Amt',
-            ref_kw='Chq',
-        )
 

@@ -1,12 +1,12 @@
 from pathlib import Path
 
 ACCOUNTS = {
-    "icici": "Liabilities:CreditCard:ICICI:Coral",
-    "hdfc": "Liabilities:CreditCard:HDFC:TataNeu",
-    "axis": "Liabilities:CreditCard:Axis:MyZone",
-    "icici-xls": "Assets:Bank:ICICI",
-    "hdfc-xls": "Assets:Bank:HDFC",
-    "axis-xls": "Assets:Bank:Axis",
+    "icici-cc": "Liabilities:CreditCard:ICICI",
+    "hdfc-cc": "Liabilities:CreditCard:HDFC",
+    "axis-cc": "Liabilities:CreditCard:Axis",
+    "icici": "Assets:Bank:ICICI",
+    "hdfc": "Assets:Bank:HDFC",
+    "axis": "Assets:Bank:Axis",
 }
 
 REWARDS_ACCOUNTS = {
@@ -18,91 +18,68 @@ REWARDS_ACCOUNTS = {
 # Rules: (keyword_regex, category, tags)
 # Applied in order - first match wins. Keywords are case-insensitive regex.
 RULES = [
-    # Food - Delivery
-    ("swiggy", "Expenses:Food:Delivery", ["food"]),
-    ("zomato", "Expenses:Food:Delivery", ["food"]),
-    ("dunzo", "Expenses:Food:Delivery", ["food"]),
+    ("i shop https://ishop i", "Expenses:IShop", ["voucher"]),
 
-    # Food - Grocery
-    ("blinkit", "Expenses:Food:Grocery", ["food"]),
-    ("zepto", "Expenses:Food:Grocery", ["food"]),
-    ("bigbasket", "Expenses:Food:Grocery", ["food"]),
-    ("jiomart", "Expenses:Food:Grocery", ["food"]),
-    ("dmart", "Expenses:Food:Grocery", ["food"]),
-    ("grofers", "Expenses:Food:Grocery", ["food"]),
-    ("instamart", "Expenses:Food:Grocery", ["food"]),  # Swiggy Instamart
-
-    # Food - Restaurants & Cafes
-    ("dominos", "Expenses:Food:Restaurant", ["food"]),
-    ("pizza hut", "Expenses:Food:Restaurant", ["food"]),
-    ("mcdonald", "Expenses:Food:Restaurant", ["food"]),
-    ("kfc", "Expenses:Food:Restaurant", ["food"]),
-    ("subway", "Expenses:Food:Restaurant", ["food"]),
-    ("starbucks", "Expenses:Food:Restaurant", ["food"]),
-    ("cafe coffee day", "Expenses:Food:Restaurant", ["food"]),
-    ("burger king", "Expenses:Food:Restaurant", ["food"]),
+    # Food
+    ("swiggy", "Expenses:Food", []),
+    ("zomato", "Expenses:Food", []),
+    ("blinkit", "Expenses:Grocery", []),
+    ("zepto", "Expenses:Grocery", []),
+    ("bigbasket", "Expenses:Grocery", []),
+    ("jiomart", "Expenses:Grocery", []),
+    ("dmart", "Expenses:Grocery", []),
+    ("grofers", "Expenses:Grocery", []),
+    ("instamart", "Expenses:Grocery", []),  # Swiggy Instamart
+    ("dominos", "Expenses:Food", []),
+    ("pizza hut", "Expenses:Food", []),
+    ("mcdonald", "Expenses:Food", []),
+    ("kfc", "Expenses:Food", []),
+    ("subway", "Expenses:Food", []),
+    ("starbucks", "Expenses:Food", []),
+    ("cafe coffee day", "Expenses:Food", []),
+    ("burger king", "Expenses:Food", []),
 
     # Transport - Cab
-    ("uber", "Expenses:Transport:Cab", ["transport"]),
-    ("ola\\b", "Expenses:Transport:Cab", ["transport"]),  # \b avoids matching "cola"
-    ("rapido", "Expenses:Transport:Cab", ["transport"]),
-
-    # Transport - Fuel
-    ("hpcl", "Expenses:Transport:Fuel", ["transport"]),
-    ("iocl", "Expenses:Transport:Fuel", ["transport"]),
-    ("bpcl", "Expenses:Transport:Fuel", ["transport"]),
-    ("indian oil", "Expenses:Transport:Fuel", ["transport"]),
-    ("hindustan petroleum", "Expenses:Transport:Fuel", ["transport"]),
-    ("bharat petroleum", "Expenses:Transport:Fuel", ["transport"]),
-    ("shell", "Expenses:Transport:Fuel", ["transport"]),
+    ("uber", "Expenses:Commute", []),
+    ("ola\\b", "Expenses:Commute", []),  # \b avoids matching "cola"
+    ("rapido", "Expenses:Commute", []),
 
     # Transport - Travel
-    ("irctc", "Expenses:Travel:Train", ["travel"]),
-    ("indian railway", "Expenses:Travel:Train", ["travel"]),
-    ("indigo", "Expenses:Travel:Flight", ["travel"]),
-    ("air india", "Expenses:Travel:Flight", ["travel"]),
-    ("spicejet", "Expenses:Travel:Flight", ["travel"]),
-    ("akasa", "Expenses:Travel:Flight", ["travel"]),
-    ("vistara", "Expenses:Travel:Flight", ["travel"]),
-    ("makemytrip", "Expenses:Travel:Booking", ["travel"]),
-    ("goibibo", "Expenses:Travel:Booking", ["travel"]),
-    ("easemytrip", "Expenses:Travel:Booking", ["travel"]),
-    ("cleartrip", "Expenses:Travel:Booking", ["travel"]),
-    ("yatra", "Expenses:Travel:Booking", ["travel"]),
-    ("oyo", "Expenses:Travel:Hotel", ["travel"]),
-    ("airbnb", "Expenses:Travel:Hotel", ["travel"]),
+    ("indigo", "Expenses:Travel:Flight", []),
+    ("air india", "Expenses:Travel:Flight", []),
+    ("spicejet", "Expenses:Travel:Flight", []),
+    ("makemytrip", "Expenses:Travel", []),
+    ("goibibo", "Expenses:Travel", []),
+    ("easemytrip", "Expenses:Travel", []),
+    ("cleartrip", "Expenses:Travel", []),
+    ("yatra", "Expenses:Travel", []),
+    ("airbnb", "Expenses:Travel:Stay", []),
 
     # Shopping - Online
-    ("amazon", "Expenses:Shopping:Online", []),
-    ("flipkart", "Expenses:Shopping:Online", []),
-    ("myntra", "Expenses:Shopping:Online", []),
-    ("ajio", "Expenses:Shopping:Online", []),
-    ("meesho", "Expenses:Shopping:Online", []),
-    ("nykaa", "Expenses:Shopping:Online", []),
-    ("tatacliq", "Expenses:Shopping:Online", []),
-    ("snapdeal", "Expenses:Shopping:Online", []),
-    ("firstcry", "Expenses:Shopping:Online", []),
-
-    # Shopping - Electronics
-    ("reliance digital", "Expenses:Shopping:Electronics", []),
-    ("croma", "Expenses:Shopping:Electronics", []),
+    ("amazon", "Expenses:Shopping", []),
+    ("flipkart", "Expenses:Shopping", []),
+    ("myntra", "Expenses:Shopping", []),
+    ("ajio", "Expenses:Shopping", []),
+    ("meesho", "Expenses:Shopping", []),
+    ("nykaa", "Expenses:Shopping", []),
+    ("tatacliq", "Expenses:Shopping", []),
+    ("snapdeal", "Expenses:Shopping", []),
+    ("firstcry", "Expenses:Shopping", []),
 
     # Entertainment - Streaming
-    ("netflix", "Expenses:Entertainment:Streaming", ["entertainment"]),
-    ("hotstar", "Expenses:Entertainment:Streaming", ["entertainment"]),
-    ("amazon prime", "Expenses:Entertainment:Streaming", ["entertainment"]),
-    ("prime video", "Expenses:Entertainment:Streaming", ["entertainment"]),
-    ("jiocinema", "Expenses:Entertainment:Streaming", ["entertainment"]),
-    ("sonyliv", "Expenses:Entertainment:Streaming", ["entertainment"]),
-    ("zee5", "Expenses:Entertainment:Streaming", ["entertainment"]),
-    ("spotify", "Expenses:Entertainment:Streaming", ["entertainment"]),
-    ("jiosaavn", "Expenses:Entertainment:Streaming", ["entertainment"]),
-    ("gaana", "Expenses:Entertainment:Streaming", ["entertainment"]),
+    ("netflix", "Expenses:Entertainment:Streaming", []),
+    ("hotstar", "Expenses:Entertainment:Streaming", []),
+    ("amazon prime", "Expenses:Entertainment:Streaming", []),
+    ("prime video", "Expenses:Entertainment:Streaming", []),
+    ("jiocinema", "Expenses:Entertainment:Streaming", []),
+    ("sonyliv", "Expenses:Entertainment:Streaming", []),
+    ("zee5", "Expenses:Entertainment:Streaming", []),
+    ("spotify", "Expenses:Entertainment:Streaming", []),
+    ("jiosaavn", "Expenses:Entertainment:Streaming", []),
+    ("gaana", "Expenses:Entertainment:Streaming", []),
 
     # Entertainment - Other
-    ("bookmyshow", "Expenses:Entertainment:Events", ["entertainment"]),
-    ("pvr", "Expenses:Entertainment:Movies", ["entertainment"]),
-    ("inox", "Expenses:Entertainment:Movies", ["entertainment"]),
+    ("bookmyshow", "Expenses:Entertainment:Cinema", []),
 
     # Telecom
     ("airtel", "Expenses:Utilities:Telecom", []),
@@ -113,27 +90,18 @@ RULES = [
 
     # Utilities
     ("electricity", "Expenses:Utilities:Electricity", []),
-    ("bescom", "Expenses:Utilities:Electricity", []),
-    ("msedcl", "Expenses:Utilities:Electricity", []),
-    ("tata power", "Expenses:Utilities:Electricity", []),
-    ("adani electricity", "Expenses:Utilities:Electricity", []),
     ("piped gas", "Expenses:Utilities:Gas", []),
-    ("indraprastha gas", "Expenses:Utilities:Gas", []),
-    ("mahanagar gas", "Expenses:Utilities:Gas", []),
 
     # Health
-    ("apollo", "Expenses:Health:Pharmacy", ["health"]),
-    ("medplus", "Expenses:Health:Pharmacy", ["health"]),
-    ("netmeds", "Expenses:Health:Pharmacy", ["health"]),
-    ("1mg", "Expenses:Health:Pharmacy", ["health"]),
-    ("pharmeasy", "Expenses:Health:Pharmacy", ["health"]),
-    ("tata 1mg", "Expenses:Health:Pharmacy", ["health"]),
+    ("apollo", "Expenses:Health:Pharmacy", []),
+    ("medplus", "Expenses:Health:Pharmacy", []),
+    ("netmeds", "Expenses:Health:Pharmacy", []),
+    ("1mg", "Expenses:Health:Pharmacy", []),
+    ("pharmeasy", "Expenses:Health:Pharmacy", []),
+    ("tata 1mg", "Expenses:Health:Pharmacy", []),
 
     # Finance - Insurance
-    ("hdfc life", "Expenses:Finance:Insurance", []),
-    ("icici prudential", "Expenses:Finance:Insurance", []),
-    ("star health", "Expenses:Finance:Insurance", []),
-    ("niva bupa", "Expenses:Finance:Insurance", []),
+    ("hdfc life", "Expenses:Utilities:Insurance", []),
 
     # Investments
     ("zerodha", "Assets:Investment:MutualFund", ["investment", "zerodha"]),

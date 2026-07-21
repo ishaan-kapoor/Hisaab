@@ -58,31 +58,63 @@ def ensure_ledger_structure(ledger_dir: Path) -> None:
     main_file = ledger_dir / "main.beancount"
     if not main_file.exists():
         main_file.write_text(
-            "; Hisaab - Personal Finance Ledger\n"
+            '; Personal Finance Ledger\n'
+            'option "operating_currency" "INR"\n'
             'include "accounts.beancount"\n'
             'include "icici.beancount"\n'
             'include "hdfc.beancount"\n'
             'include "axis.beancount"\n'
-            'include "icici-xls.beancount"\n'
-            'include "hdfc-xls.beancount"\n'
-            'include "axis-xls.beancount"\n'
+            'include "icici-cc.beancount"\n'
+            'include "hdfc-cc.beancount"\n'
+            'include "axis-cc.beancount"\n'
+            'include "manual.beancount"\n'
         )
 
     accounts_file = ledger_dir / "accounts.beancount"
     if not accounts_file.exists():
         accounts_file.write_text(
             "; Chart of Accounts\n\n"
-            "1970-01-01 open Assets:RewardPoints:ICICI\n"
-            "1970-01-01 open Assets:RewardPoints:HDFC:NeuCoins\n"
-            "1970-01-01 open Liabilities:CreditCard:ICICI:Coral\n"
-            "1970-01-01 open Liabilities:CreditCard:HDFC:TataNeu\n"
-            "1970-01-01 open Liabilities:CreditCard:Axis:MyZone\n"
-            "1970-01-01 open Expenses:Uncategorized\n"
-            "1970-01-01 open Expenses:Food:Delivery\n"
-            "1970-01-01 open Expenses:Shopping\n"
-            "1970-01-01 open Expenses:Transport:Cab\n"
-            "1970-01-01 open Income:Uncategorized\n"
-            "1970-01-01 open Income:RewardPoints\n"
+            "1970-01-01 commodity INR\n"
+            "1970-01-01 open Assets:RewardPoints:ICICI INR\n"
+            "1970-01-01 open Assets:RewardPoints:HDFC:NeuCoins INR\n"
+            "1970-01-01 open Assets:RewardPoints:Axis INR\n"
+            "1970-01-01 open Liabilities:CreditCard:ICICI INR\n"
+            "1970-01-01 open Liabilities:CreditCard:HDFC INR\n"
+            "1970-01-01 open Liabilities:CreditCard:Axis INR\n"
+            "1970-01-01 open Assets:People INR\n"
+            "1970-01-01 open Assets:People:VeerShah INR\n"
+            "1970-01-01 open Assets:People:AyushBhardwaj INR\n"
+            "1970-01-01 open Assets:People:NishantBhandari INR\n"
+            "1970-01-01 open Assets:People:ArhamJain INR\n"
+            "1970-01-01 open Assets:People:KittyDi INR\n"
+            "1970-01-01 open Income:Uncategorized INR\n"
+            "1970-01-01 open Income:Reimbursement:DEShaw INR\n"
+            "1970-01-01 open Income:Rewards:Gpay INR\n"
+            "1970-01-01 open Income:CreditCardPayment INR\n"
+            "1970-01-01 open Income:Salary INR\n"
+            "1970-01-01 open Income:Salary:DEShaw INR\n"
+            "1970-01-01 open Income:Interest:FD INR\n"
+            "1970-01-01 open Income:Interest:Bank INR\n"
+            "1970-01-01 open Income:OpeningBalance INR\n"
+            "1970-01-01 open Assets:Investment:MutualFund INR\n"
+            "1970-01-01 open Assets:Investment:Stocks INR\n"
+            "1970-01-01 open Assets:Investment:FD INR\n"
+            "1970-01-01 open Expenses:IShop INR\n"
+            "1970-01-01 open Expenses:Uncategorized INR\n"
+            "1970-01-01 open Expenses:Food INR\n"
+            "1970-01-01 open Expenses:Grocery INR\n"
+            "1970-01-01 open Expenses:Shopping INR\n"
+            "1970-01-01 open Expenses:Commute INR\n"
+            "1970-01-01 open Expenses:Travel INR\n"
+            "1970-01-01 open Expenses:Travel:Flight INR\n"
+            "1970-01-01 open Expenses:Travel:Stay INR\n"
+            "1970-01-01 open Expenses:Utilities INR\n"
+            "1970-01-01 open Expenses:Utilities:Electricity INR\n"
+            "1970-01-01 open Expenses:Utilities:Gas INR\n"
+            "1970-01-01 open Expenses:Utilities:Telecom INR\n"
+            "1970-01-01 open Expenses:Health:Pharmacy INR\n"
+            "1970-01-01 open Expenses:Entertainment:Cinema INR\n"
+            "1970-01-01 open Expenses:Entertainment:Streaming INR\n"
         )
 
 

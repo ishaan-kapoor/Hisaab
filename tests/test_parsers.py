@@ -184,26 +184,26 @@ class TestStatementParserABC:
         assert list(result.columns) == REQUIRED_COLUMNS
 
 
-from hisaab.parsers.icici import ICICIParser
-from hisaab.parsers.hdfc import HDFCParser
-from hisaab.parsers.axis import AxisParser
+from hisaab.parsers.icici import ICICI_CC_Parser
+from hisaab.parsers.hdfc import HDFC_CC_Parser
+from hisaab.parsers.axis import Axis_CC_Parser
 
 
 class TestICICIParser:
     def test_is_statement_parser(self):
         """ICICIParser should inherit from StatementParser."""
-        parser = ICICIParser()
+        parser = ICICI_CC_Parser()
         assert isinstance(parser, StatementParser)
 
     def test_parse_returns_dataframe(self):
         """parse() should return a DataFrame (empty for nonexistent file)."""
-        parser = ICICIParser()
+        parser = ICICI_CC_Parser()
         result = parser.parse("/nonexistent/file.pdf")
         assert isinstance(result, pd.DataFrame)
 
     def test_parse_output_has_standard_columns(self):
         """parse() output should have all required columns."""
-        parser = ICICIParser()
+        parser = ICICI_CC_Parser()
         result = parser.parse("/nonexistent/file.pdf")
         assert list(result.columns) == REQUIRED_COLUMNS
 

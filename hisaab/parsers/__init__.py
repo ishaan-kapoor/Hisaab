@@ -1,13 +1,12 @@
-from hisaab.parsers.axis import AxisParser
-from hisaab.parsers.hdfc import HDFCParser
-from hisaab.parsers.icici import ICICIParser
-from hisaab.parsers.xls import AxisXLSParser, HDFCXLSParser, ICICIXLSParser
+from hisaab.parsers.axis import Axis_CC_Parser, AxisXLSParser
+from hisaab.parsers.hdfc import HDFC_CC_Parser, HDFCXLSParser
+from hisaab.parsers.icici import ICICI_CC_Parser, ICICIXLSParser
 
 PARSERS = {
-    "icici": ICICIParser(),
-    "hdfc": HDFCParser(),
-    "axis": AxisParser(),
-    "icici-xls": ICICIXLSParser(),
-    "hdfc-xls": HDFCXLSParser(),
-    "axis-xls": AxisXLSParser(),
+    "icici-cc": ICICI_CC_Parser(),
+    "hdfc-cc": HDFC_CC_Parser(),
+    "axis-cc": Axis_CC_Parser(),
+    "icici": ICICIXLSParser(),
+    "hdfc": HDFCXLSParser(),
+    "axis": AxisXLSParser(),
 }
